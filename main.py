@@ -1,6 +1,6 @@
 import pygame
 import sys
-
+import random
 
 pygame.init()
 
@@ -47,7 +47,7 @@ class Player(pygame.sprite.Sprite):
 
             # Collision Detection
             obstacle_collision = False
-            for obstacle in obstacles:
+            for obstacle in obstacles + crates:
                 if obstacle.rect.colliderect(temp_rect):
                     obstacle_collision = True
                     break
@@ -86,6 +86,7 @@ class Bomb(pygame.sprite.Sprite):
         self.explosion_time = pygame.time.get_ticks()
         print("Bomb exploded")
 
+
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -95,22 +96,49 @@ class Obstacle(pygame.sprite.Sprite):
         self.rect.topleft = (x, y)
 
 
+class Crate(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.Surface((obstacle_size, obstacle_size))
+        self.image.fill(BLUE)
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+
+
+# Initializes sprites
+all_sprites = pygame.sprite.Group()
+
 invalid_positions = [(0, 0, ), (grid_width - 1, grid_height - 1)]
-obstacles = []
 
 border_size = 35
 border_width = 2
 inner_grid_width = grid_width - 2 * border_width
 inner_grid_height = grid_height - 2 * border_width
 
+obstacles = []
+crates = []
+num_crates = 35
+
 for x in range(border_width, border_width + inner_grid_width):
     for y in range(border_width, border_width + inner_grid_height):
         if x % 2 == 0 and y % 2 == 0:
             obstacles.append(Obstacle(x * grid_size, y * grid_size))
 
+crate_positions = [(x, y) for x in range(grid_size, screen_width - grid_size, grid_size)
+                   for y in range(grid_size, screen_height - grid_size, grid_size)
+                   if (x, y) not in [(obstacle.rect.x, obstacle.rect.y) for obstacle in obstacles]]
+
+random.shuffle(crate_positions)
+crates = [Crate(x, y) for x, y in crate_positions[:num_crates]]
+for crate in crates:
+    all_sprites.add(crate)
+all_sprites.draw(screen)
+
+
+
 player = Player()
 bomb = None
-all_sprites = pygame.sprite.Group()
+
 
 running = True
 while running:
@@ -143,6 +171,8 @@ while running:
         bomb = Bomb(player.rect)
         all_sprites.add(bomb)
 
+    all_sprites.update()
+    all_sprites.draw(screen)
     for obstacle in obstacles:
         screen.blit(obstacle.image, obstacle.rect)
     screen.blit(player.image, player.rect)
