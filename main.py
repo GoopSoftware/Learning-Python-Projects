@@ -91,8 +91,9 @@ class Bomb(pygame.sprite.Sprite):
                 sprite.kill()
 
             for crate in crates:
-                if crate.rect.collidelistall(self.cross_sprites):
-                    crate.kill()
+                if crate.rect.collidelistall(self.cross_sprites) and not crate.exploded:
+                    crate.explode_crate()
+                    print("Exploding Crate")
     def explode(self):
         self.exploded = True
         self.explosion_time = pygame.time.get_ticks()
@@ -127,11 +128,12 @@ class Crate(pygame.sprite.Sprite):
         self.rect.topleft = (x, y)
         self.exploded = False
 
-    def exploded(self):
+    def explode_crate(self):
         self.exploded = True
         self.kill()
+        print("crate exploded")
         all_sprites.remove(self)
-        crate.remove(self)
+        #crate.remove(self)
 
 # Initializes sprites
 all_sprites = pygame.sprite.Group()
@@ -169,7 +171,7 @@ all_sprites.draw(screen)
 
 player = Player()
 bomb = None
-
+exploded_crates = []
 
 running = True
 while running:
@@ -229,6 +231,9 @@ while running:
 
     if bomb and bomb.exploded and pygame.time.get_ticks() - bomb.explosion_time > bomb_duration:
         bomb = None
+        print("Exploded Crates:")
+        for crate in exploded_crates:
+            print("- Pisition:", crate.rect.center)
 
 pygame.quit()
 sys.exit()
