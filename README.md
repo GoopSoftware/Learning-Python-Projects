@@ -11,4 +11,4 @@ strengthen my skills using them.
 - WASD movement
 - Object Collision
 
-## This project was devloped by Jacob Reschke https://github.com/goopSoftware/
+## This project was devloped by Goop Software https://github.com/goopSoftware/
